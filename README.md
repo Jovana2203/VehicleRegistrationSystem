@@ -22,4 +22,3 @@ Focused on the role of an **Implementation Consultant**, the code handles real-w
 - **LINQ Queries**: Demonstrated the ability to perform complex data filtering and reporting directly within the application logic.
 
 ---
-*Developed as part of a technical refresh to align with industry standards for Data Engineering and Implementation Consultant roles.*
