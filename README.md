@@ -1,17 +1,25 @@
+# Vehicle Registration & Validation System
 
-# Vehicle Registration Validator
+This project is a technical simulation of a **Governmental Registration System**, designed to demonstrate core proficiency in **C#**, **Object-Oriented Programming (OOP)**, and **Relational Database Logic (SQL)**.
 
-A simple C# console application designed to demonstrate **Object-Oriented Programming (OOP)** principles and data validation logic. This project simulates a government vehicle registry system that evaluates vehicles based on technical, legal, and age requirements.
+## 🚀 Key Features & Technical Implementation
 
-## 🚀 Key Features
-- **Object-Oriented Design**: Utilizes a `Vehicle` class to encapsulate data and behavior.
-- **Automated Validation**: Checks for mechanical functionality, tax compliance, and ownership documentation.
-- **Custom Business Rules**: Implements an age-limit check (restricting vehicles older than 20 years).
-- **Collection Management**: Demonstrates the use of `List<T>` and `foreach` loops to process multiple records efficiently.
+### 1. Object-Oriented Programming (OOP)
+The system is built on a clean, hierarchical structure:
+- **Encapsulation**: Used classes and properties to manage vehicle states (Model, Year, Status).
+- **Inheritance**: Implemented a `Truck` class that inherits from a base `Vehicle` class, demonstrating code reusability.
+- **Polymorphism**: Utilized `virtual` and `override` methods to apply specific registration rules for different vehicle types within a single collection.
 
-## 🛠️ Technical Implementation
-- **Language**: C#
-- **Concepts**: Classes, Constructors, Auto-Implemented Properties, String Interpolation, and Conditional Logic.
+### 2. Business Logic & Data Validation
+Focused on the role of an **Implementation Consultant**, the code handles real-world data constraints:
+- **Age Validation**: Automatically flags vehicles older than 20 years.
+- **Future-Proofing**: Prevents data entry errors for vehicle years set in the future.
+- **Null-Safety**: Includes checks for missing or corrupted data (e.g., empty model names).
+- **Special Requirements**: Automated checks for heavy-duty vehicles requiring specific licenses.
 
-## 📋 How It Works
-The program iterates through a collection of vehicles. For each vehicle, it executes the `GetRegistrationReport()` method, which aggregates all failed conditions into a single report. If no errors are found, the vehicle is marked as "Approved".
+### 3. Data Management (SQL & LINQ)
+- **SQL Integration**: Includes a `Database.sql` script for table creation and data seeding.
+- **LINQ Queries**: Demonstrated the ability to perform complex data filtering and reporting directly within the application logic.
+
+---
+*Developed as part of a technical refresh to align with industry standards for Data Engineering and Implementation Consultant roles.*
