@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-// ENUM: Defining a fixed set of states for the registration process
+// Enum for managing the lifecycle of a registration request
 public enum RegistrationStatus
 {
     Pending,
@@ -14,65 +14,73 @@ public class Program
 {
     public static void Main()
     {
-        // POLYMORPHISM: One list to manage all vehicle types (Cars and Trucks)
+        // Polymorphism in action: A list of 'Vehicle' can store both Vehicle and Truck objects
         List<Vehicle> vehicles = new List<Vehicle>();
 
-        // SEEDING DATA: Adding mixed test cases
+        // Adding test data to the collection
         vehicles.Add(new Vehicle(true, true, true, 2015, "Audi A4"));
         vehicles.Add(new Vehicle(false, true, true, 2005, "Yugo"));
         vehicles.Add(new Vehicle(true, false, true, 2022, "Tesla Model 3"));
-        vehicles.Add(new Vehicle(true, true, true, 2029, "Audi A3")); // Testing future date validation
-        
-        // INHERITANCE: Adding a Truck to the Vehicle list
+        vehicles.Add(new Vehicle(true, true, true, 2029, "Audi A3")); // Edge case: Future year
         vehicles.Add(new Truck(true, true, true, 2018, "Volvo FH16", 5000));
+        vehicles.Add(new Vehicle(true, true, true, 2013, "")); // Edge case: Missing model name
+        vehicles.Add(new Vehicle(true, true, true, 2000, "Fiat")); // Eligible for discount
+
+        Console.WriteLine("================================================================================");
+        Console.WriteLine("📊 VEHICLE REGISTRATION SYSTEM - FINAL REPORT (2026)");
+        Console.WriteLine("================================================================================");
         
-        // Testing data validation with a missing model name
-        vehicles.Add(new Vehicle(true, true, true, 2013, ""));
+        // TABLE HEADER: Using PadRight to ensure fixed-width columns for a professional terminal UI
+        Console.WriteLine("MODEL".PadRight(18) + "| YEAR | STATUS".PadRight(15) + "| PRICE    | NOTES");
+        Console.WriteLine(new string('-', 80));
 
-        Console.WriteLine("--- VEHICLE REGISTRATION SYSTEM ---\n");
-
-        // FIRST PASS: Processing and updating statuses
         foreach (var v in vehicles)
         {
-            // DATA VALIDATION: Skipping entries with critical missing data
-            if (string.IsNullOrEmpty(v.Model)) 
-            {
-                Console.WriteLine("CRITICAL ERROR: Entry missing a model name!");
-                continue; 
-            }
+            // Trigger the business logic to determine the CurrentStatus (Active/Rejected)
+            string report = v.GetRegistrationReport();
+            
+            // Calculate fee based on the business rule (discounts for old vehicles)
+            double finalPrice = v.CalculateRegistrationFee(200);
 
-            Console.WriteLine($"Processing: {v.Model}");
-            // POLYMORPHISM IN ACTION: Calls the appropriate method version for Vehicle or Truck
-            Console.WriteLine($"- Status: {v.GetRegistrationReport()}");
-            Console.WriteLine("---------------------------");
-        }
-        
-        // LINQ: SQL-like filtering for modern vehicles
-        var modernCars = vehicles.Where(v => v.Year > 2010 && !string.IsNullOrEmpty(v.Model)).ToList();
-        Console.WriteLine("\n--- SQL SIMULATION: Modern Cars (>2010) ---");
-        foreach (var car in modernCars)
-        {
-             Console.WriteLine($"Found: {car.Model}");
-        }
-        
-        // LINQ: Filtering by ENUM status
-        var rejectedCars = vehicles.Where(v => v.CurrentStatus == RegistrationStatus.Rejected).ToList();
-        Console.WriteLine("\n--- SQL SIMULATION: Rejected Vehicles ---");
-        foreach (var car in rejectedCars)
-        {
-             Console.WriteLine($"Found: {car.Model}");
+            // Ternary operator for handling empty data points
+            string displayName = string.IsNullOrEmpty(v.Model) ? "UNKNOWN MODEL" : v.Model;
+
+            // Context-aware notes to provide more information about the row
+            string note = "";
+            if (v.Year > 2026) note = "FUTURE YEAR ERROR!";
+            else if (v.Year <= 2001) note = "40% Discount applied";
+            else if (report.Contains("FAILED")) note = "Check inspection logs";
+            
+            // Type checking: Identify specific vehicle types during iteration
+            if (v is Truck) note += " [Heavy Duty]";
+
+            // FINAL TABULAR OUTPUT
+            Console.WriteLine(
+                displayName.PadRight(18) + "| " + 
+                v.Year.ToString().PadRight(5) + "| " + 
+                v.CurrentStatus.ToString().PadRight(13) + "| " + 
+                (finalPrice + " EUR").PadRight(9) + "| " + 
+                note
+            );
         }
 
-        // LINQ: Counting broken vehicles
+        Console.WriteLine(new string('-', 80));
+
+        // DATABASE INSIGHTS: Using LINQ (Language Integrated Query) for data analysis
+        Console.WriteLine("\n🔍 DATABASE INSIGHTS (SQL SIMULATION):");
         int brokenCount = vehicles.Count(v => !v.IsFunctional);
-        Console.WriteLine($"\nNumber of broken vehicles in database: {brokenCount}");
+        int rejectedCount = vehicles.Count(v => v.CurrentStatus == RegistrationStatus.Rejected);
+        
+        Console.WriteLine($"- Total Vehicles in system: {vehicles.Count}");
+        Console.WriteLine($"- Non-functional vehicles: {brokenCount}");
+        Console.WriteLine($"- Rejected applications: {rejectedCount}");
+        Console.WriteLine("================================================================================");
     }
 }
 
-// BASE CLASS (Parent)
 public class Vehicle
 {
-    // ENCAPSULATION: Managing internal state through properties
+    // Properties representing the core state of a vehicle
     public string Model { get; set; }
     public int Year { get; set; }
     public bool IsFunctional { get; set; }
@@ -80,7 +88,7 @@ public class Vehicle
     public bool HasTitle { get; set; }
     public RegistrationStatus CurrentStatus { get; set; }
 
-    // CONSTRUCTOR: Initializing properties and setting default Enum status
+    // Constructor to initialize a new Vehicle instance
     public Vehicle(bool functional, bool tax, bool title, int year, string model)
     {
         IsFunctional = functional;
@@ -91,32 +99,23 @@ public class Vehicle
         CurrentStatus = RegistrationStatus.Pending;
     }
 
-    // ABSTRACTION: Complex logic is hidden inside this method
-    // 'virtual' allows subclasses like Truck to override this behavior
+    // Business Logic Method: Validates if the vehicle meets legal requirements
+    // Marked as 'virtual' to allow specialized logic in derived classes (Truck)
     public virtual string GetRegistrationReport()
     {
-        int currentYear = 2026;
-        int maxAge = 20;
         string errors = "";
 
         if (!IsFunctional) errors += "Broken. ";
         if (!TaxPaid) errors += "Tax unpaid. ";
         if (!HasTitle) errors += "No title. ";
-        
-        if (currentYear - Year > maxAge) 
-        {
-            errors += "Exceeds age limit (20+ years). ";
-        }
-        if (Year > currentYear) 
-        {
-            errors += "Invalid year: Future date. ";
-        }
+        if (2026 - Year > 20) errors += "Age exceeds 20y. ";
+        if (Year > 2026) errors += "Invalid future year. ";
 
-        // Updating the ENUM status based on validation results
-        if (errors == "")
+        // Validating both physical conditions and data integrity
+        if (errors == "" && !string.IsNullOrEmpty(Model))
         {
             CurrentStatus = RegistrationStatus.Active;
-            return "SUCCESS: Registered";
+            return "SUCCESS";
         }
         else
         {
@@ -124,29 +123,39 @@ public class Vehicle
             return "FAILED: " + errors;
         }
     }
+
+    // Encapsulated Logic: Determines registration costs based on vehicle age
+    public double CalculateRegistrationFee(double basePrice)
+    {
+        int age = 2026 - Year;
+        // Discount policy: 40% off for vehicles older than 25 years
+        if (age > 25) return basePrice * 0.6; 
+        return basePrice;
+    }
 }
 
-// DERIVED CLASS (Child) - INHERITANCE
+// Inheritance: Truck inherits all properties and methods from Vehicle
 public class Truck : Vehicle
 {
     public int MaxWeight { get; set; }
 
-    // Using 'base' to pass data to the Parent class constructor
+    // Using the 'base' keyword to call the parent class constructor
     public Truck(bool functional, bool tax, bool title, int year, string model, int weight) 
         : base(functional, tax, title, year, model)
     {
         MaxWeight = weight;
     }
 
-    // METHOD OVERRIDING: Customizing behavior for heavy vehicles
+    // Method Overriding: Adding custom business logic specific to Trucks
     public override string GetRegistrationReport()
     {
-        string baseStatus = base.GetRegistrationReport();
+        string baseReport = base.GetRegistrationReport();
         
-        if (baseStatus.Contains("SUCCESS") && MaxWeight > 3500)
+        // Even if basic checks pass, trucks have an additional weight restriction
+        if (baseReport == "SUCCESS" && MaxWeight > 3500)
         {
-            return "SUCCESS (Special Heavy License Required)";
+            return "SUCCESS (Heavy Vehicle Permit Required)";
         }
-        return baseStatus;
+        return baseReport;
     }
 }
