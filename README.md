@@ -1,5 +1,7 @@
 Vehicle Registration System (C# OOP & Business Logic)
+
 Overview
+
 This project is a Vehicle Registration Management System developed in C#. It demonstrates the application of core Object-Oriented Programming (OOP) principles to solve a real-world business scenario: automating vehicle inspections and registration fee calculations.
 
 The system processes a fleet of vehicles, applies specific business rules (such as age-based discounts and safety checks), and generates a structured report for the user.
